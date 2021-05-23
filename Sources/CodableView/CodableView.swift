@@ -380,6 +380,8 @@ public struct CodableView: Codable, View, Identifiable {
         case Divider
         case List
         case ScrollView
+        case NavigationView
+        case NavigationLink
     }
     
     public var id = UUID()
@@ -389,11 +391,22 @@ public struct CodableView: Codable, View, Identifiable {
     public var properties: Properties?
     public var subviews: [CodableView]?
     
+    public var content: [CodableView]?
+    public var destination: [CodableView]?
+    public var destinationUrl: [URLView]?
+    public var label: [CodableView]?
+    
+    public var url: URL?
+    
     public enum CodingKeys: String, CodingKey {
         case type
         case value
         case properties
         case subviews
+        case content
+        case destination
+        case destinationUrl
+        case label
     }
     
     public var body: some View {
@@ -405,14 +418,21 @@ public struct CodableView: Codable, View, Identifiable {
             .modifier(PaddingModifier(padding: properties?.padding?.convert()))
     }
     
-    public init(id: UUID = UUID(), type: CodableView.ViewType? = nil, value: CodableView.Value? = nil, properties: CodableView.Properties? = nil, subviews: [CodableView]? = nil) {
+    public init(id: UUID = UUID(), type: CodableView.ViewType? = nil, value: CodableView.Value? = nil, properties: CodableView.Properties? = nil, subviews: [CodableView]? = nil, content: [CodableView]? = nil, destination: [CodableView]? = nil, destinationUrl: [URLView]? = nil, label: [CodableView]? = nil) {
         self.id = id
         self.type = type
         self.value = value
         self.properties = properties
         self.subviews = subviews
+        self.content = content
+        self.destination = destination
+        self.destinationUrl = destinationUrl
+        self.label = label
     }
 
+    public init(url: URL) {
+        self.url = url
+    }
 }
 
 private extension CodableView {
@@ -500,6 +520,30 @@ private extension CodableView {
         Spacer(minLength: minLength)
     }
     
+    @ViewBuilder func navigationView() -> some View {
+        NavigationView(content: {
+            self.content?.first
+        })
+    }
+    
+    @ViewBuilder func navigationLink() -> some View {
+        if let destinationUrl =  self.destinationUrl?.first {
+            NavigationLink(
+                destination: destinationUrl,
+                label: {
+                    self.label?.first
+                })
+        } else {
+            NavigationLink(
+                destination: self.destination?.first,
+                label: {
+                    self.label?.first
+                })
+        }
+        
+    }
+    
+    
     @ViewBuilder func render() -> some View {
         switch self.type {
         case .ScrollView: scrollView()
@@ -513,6 +557,8 @@ private extension CodableView {
         case .Rectangle: Rectangle()
         case .Divider: Divider()
         case .Circle: Circle()
+        case .NavigationView: navigationView()
+        case .NavigationLink: navigationLink()
         default: EmptyView()
         }
     }
