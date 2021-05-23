@@ -81,24 +81,9 @@ public struct URLView: Codable, View, Identifiable {
         if self.contentView.subviews?.first?.value?.text != "Error"  {
             contentView
         } else {
-            ActivityIndicator(isAnimating: true)
-//                .configure { $0.color = .yellow } // Optional configurations (🎁 bouns)
-//                .background(Color.blue)
+            VStack {
+                Text("Loading...")
+            }
         }
-    }
-}
-
-
-
-struct ActivityIndicator: UIViewRepresentable {
-    
-    typealias UIView = UIActivityIndicatorView
-    var isAnimating: Bool
-    fileprivate var configuration = { (indicator: UIView) in }
-
-    func makeUIView(context: UIViewRepresentableContext<Self>) -> UIView { UIView() }
-    func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<Self>) {
-        isAnimating ? uiView.startAnimating() : uiView.stopAnimating()
-        configuration(uiView)
     }
 }
